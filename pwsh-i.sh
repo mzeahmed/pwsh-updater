@@ -69,7 +69,7 @@ echo -e "${GREEN}Symbolic link created.${NC}"
 
 # Cleanup
 echo -e "${CYAN}Cleaning up...${NC}"
-rm -f powershell.tar.gz & rm -rf powershell7 & spinner
+(rm -f powershell.tar.gz "$ARCHIVE" && rm -rf ~/powershell7) & spinner
 echo -e "${GREEN}Cleanup done.${NC}"
 
 # Done
