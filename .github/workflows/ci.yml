@@ -1,0 +1,53 @@
+# Intégration continue : vérifie que chaque push et chaque pull request
+# compile, est correctement formaté et passe go vet.
+name: CI
+
+# Exécuté sur chaque push vers main et sur chaque pull request.
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+
+# Checkout en lecture seule : tout ce dont ce workflow a besoin.
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          # Lit la version de Go depuis go.mod au lieu de la coder en
+          # dur, pour que ce workflow ne puisse jamais diverger du
+          # module.
+          go-version-file: go.mod
+          # Met en cache les téléchargements de modules et le build
+          # entre les exécutions.
+          cache: true
+
+      - name: Format
+        run: go fmt ./...
+
+      - name: Check formatting
+        # go fmt ci-dessus réécrit en place tout fichier mal formaté. Si
+        # il a modifié quelque chose, le checkout est désormais sale et
+        # ce diff est non vide, ce qui fait échouer l'étape
+        # (git diff --exit-code renvoie 1 en cas de différences).
+        run: git diff --exit-code
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build
+        run: go build ./...

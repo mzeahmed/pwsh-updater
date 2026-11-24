@@ -1,0 +1,43 @@
+# Publie une GitHub Release à chaque push d'un tag "vX.Y.Z". Le build, le
+# packaging et la génération du changelog sont entièrement gérés par
+# GoReleaser (voir .goreleaser.yaml).
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# contents: write permet à GoReleaser de créer la GitHub Release et
+# d'y téléverser les binaires construits. Rien d'autre n'est nécessaire.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # GoReleaser a besoin de l'historique complet et de tous les
+          # tags pour générer le changelog entre le tag précédent et
+          # celui-ci.
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          # Lit la version de Go depuis go.mod au lieu de la coder en
+          # dur, pour éviter toute divergence avec le module.
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          version: "v2.17.0"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

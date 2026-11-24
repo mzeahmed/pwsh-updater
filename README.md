@@ -10,7 +10,19 @@ Installe ou met à jour PowerShell sur Linux depuis les releases GitHub officiel
 
 ## Installation
 
-### Depuis les sources (recommandé)
+### Avec curl (recommandé)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mzeahmed/pwsh-updater/main/install.sh | sh
+```
+
+Télécharge la dernière release pour votre architecture, vérifie son checksum et installe le binaire dans `/usr/local/bin` (sudo si nécessaire). Pour une version précise ou un autre dossier :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mzeahmed/pwsh-updater/main/install.sh | VERSION=v1.0.0 BINDIR=~/.local/bin sh
+```
+
+### Depuis les sources
 
 ```bash
 git clone https://github.com/mzeahmed/pwsh-updater.git
@@ -46,6 +58,17 @@ Si l'outil n'est pas lancé en root, il se relance automatiquement avec `sudo`.
 - Télécharge l'archive et vérifie son SHA-256 (`hashes.sha256` de la release)
 - Remplace `/opt/microsoft/powershell/7` et met à jour le lien `/usr/bin/pwsh`
 - Nettoie les fichiers temporaires
+
+## Release
+
+Pousser un tag `vX.Y.Z` déclenche le workflow GitHub Actions `Release` : GoReleaser compile les binaires Linux (amd64, arm64, armv7), génère `checksums.txt` et le changelog, puis publie la GitHub Release.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Un workflow `CI` (format, vet, tests, build) tourne sur chaque push vers `main` et sur chaque pull request.
 
 ## Développement
 
