@@ -1,7 +1,7 @@
 BINARY  := pwsh-updater
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS := -s -w -X main.version=$(VERSION)
-GO      ?= go
+GO      ?= $(shell command -v go 2>/dev/null || echo /usr/local/go/bin/go)
 BINDIR  ?= /usr/local/bin
 
 .DEFAULT_GOAL := help
@@ -13,8 +13,9 @@ help: ## Affiche cette aide
 build: ## Compile le binaire dans ./pwsh-updater
 	$(GO) build -ldflags "$(LDFLAGS)" -o $(BINARY) .
 
-install: build ## Compile et installe le binaire dans /usr/local/bin (sudo)
+install: build ## Compile, installe dans /usr/local/bin (sudo) et retire le binaire local
 	sudo install -m 755 $(BINARY) $(BINDIR)/$(BINARY)
+	@rm -f $(BINARY)
 
 uninstall: ## Supprime le binaire de /usr/local/bin (sudo)
 	sudo rm -f $(BINDIR)/$(BINARY)

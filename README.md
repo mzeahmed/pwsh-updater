@@ -54,7 +54,7 @@ Un `Makefile` regroupe les commandes utiles (`make help` pour la liste) :
 | Commande | Action |
 |---|---|
 | `make build` | Compile le binaire `./pwsh-updater` |
-| `make install` | Compile et installe dans `/usr/local/bin` (sudo, `BINDIR=` pour changer) |
+| `make install` | Compile, installe dans `/usr/local/bin` (sudo, `BINDIR=` pour changer) puis retire le binaire local |
 | `make uninstall` | Supprime le binaire de `/usr/local/bin` |
 | `make run ARGS="--check"` | Compile puis lance avec des arguments |
 | `make check` | Vérifie si une mise à jour de PowerShell existe |
