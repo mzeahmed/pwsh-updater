@@ -1,38 +1,64 @@
-# PowerShell Installer for Linux
+# pwsh-updater
 
-This script is designed to simplify the process of installing PowerShell on Linux systems. It will download the latest version of PowerShell from the official GitHub repository, extract the archive, move the files to the correct location, and configure the system to run the pwsh command.
+[![Go Version](https://img.shields.io/github/go-mod/go-version/mzeahmed/pwsh-updater)](go.mod)
+[![License](https://img.shields.io/github/license/mzeahmed/pwsh-updater)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/mzeahmed/pwsh-updater)](https://github.com/mzeahmed/pwsh-updater/commits/main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mzeahmed/pwsh-updater)](https://goreportcard.com/report/github.com/mzeahmed/pwsh-updater)
+![Platform](https://img.shields.io/badge/platform-linux-informational)
 
-The script is designed to be run as a sudo user, as it requires root access to complete the installation. Once the script is complete, you will be able to run PowerShell by simply typing `pwsh` into your terminal.
+Installe ou met à jour PowerShell sur Linux depuis les releases GitHub officielles. Binaire Go unique, sans dépendance à l'exécution (ni `wget`, ni `tar`). `make` n'est utile que pour compiler.
 
-Please note that this script is provided as-is, and you should use caution when running scripts from unknown sources. Be sure to review the script before running it, and ensure that you trust the source.
-## Usage
+## Installation
 
-You can install or update PowerShell on Linux using Make or by running the script directly.
+### Depuis les sources (recommandé)
 
-### Prerequisites
-- sudo privileges
-- wget and tar installed
-
-### Using Make
 ```bash
-make i v=7.5.1
-```
-- Replace `7.5.1` with the desired PowerShell version number.
-
-### Direct script usage
-```bash
-chmod +x ./pwsh-i.sh
-./pwsh-i.sh 7.5.1
+git clone https://github.com/mzeahmed/pwsh-updater.git
+cd pwsh-updater
+make install
 ```
 
-### What the installer does
-- Removes any existing PowerShell installation at `/opt/microsoft/powershell/7`
-- Downloads the specified version from the official GitHub releases
-- Extracts and copies files to `/opt/microsoft/powershell/7`
-- Makes `pwsh` executable and creates/updates the `/usr/bin/pwsh` symlink
-- Cleans up temporary files
+Le binaire est compilé puis copié dans `/usr/local/bin` (sudo requis).
 
-### Verify installation
+### Avec `go install`
+
 ```bash
-pwsh -v
+go install github.com/mzeahmed/pwsh-updater@latest
 ```
+
+Le binaire est placé dans `$(go env GOPATH)/bin` (pensez à l'ajouter au `PATH`).
+
+## Utilisation
+
+```bash
+pwsh-updater            # installe la dernière version stable
+pwsh-updater 7.5.1      # installe une version précise
+pwsh-updater --check    # vérifie si une mise à jour est disponible
+pwsh-updater --force    # réinstalle même si la version est déjà présente
+pwsh-updater --version  # version de l'outil
+```
+
+Si l'outil n'est pas lancé en root, il se relance automatiquement avec `sudo`.
+
+## Ce que fait l'outil
+
+- Détecte l'architecture (x64, arm64, arm32) et la dernière version si aucune n'est donnée
+- Télécharge l'archive et vérifie son SHA-256 (`hashes.sha256` de la release)
+- Remplace `/opt/microsoft/powershell/7` et met à jour le lien `/usr/bin/pwsh`
+- Nettoie les fichiers temporaires
+
+## Développement
+
+Un `Makefile` regroupe les commandes utiles (`make help` pour la liste) :
+
+| Commande | Action |
+|---|---|
+| `make build` | Compile le binaire `./pwsh-updater` |
+| `make install` | Compile et installe dans `/usr/local/bin` (sudo, `BINDIR=` pour changer) |
+| `make uninstall` | Supprime le binaire de `/usr/local/bin` |
+| `make run ARGS="--check"` | Compile puis lance avec des arguments |
+| `make check` | Vérifie si une mise à jour de PowerShell existe |
+| `make fmt` / `make vet` / `make test` | Format, analyse statique, tests |
+| `make clean` | Supprime le binaire compilé |
+
+La version embarquée vient de `git describe` (surchargeable : `make build VERSION=1.0.0`).
